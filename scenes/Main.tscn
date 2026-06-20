@@ -1,8 +1,11 @@
 [gd_scene format=3 uid="uid://bnml0ptasppvr"]
 
 [ext_resource type="Script" uid="uid://ck6u5d0le4njd" path="res://scripts/RayTraceController.gd" id="1_ctrl"]
+[ext_resource type="Texture2D" uid="uid://bjk4dt2wjhlas" path="res://assets/floorTexture/patterned_concrete_wall_diff_4k.png" id="2_c01mt"]
 [ext_resource type="PackedScene" uid="uid://cjmma46ya5682" path="res://assets/fruits/lime.fbx" id="2_rvslj"]
 [ext_resource type="PackedScene" uid="uid://ic2aphk0w6y5" path="res://assets/glowstone.fbx" id="3_0bbpv"]
+[ext_resource type="Texture2D" uid="uid://cwicn7ote2q4j" path="res://assets/floorTexture/patterned_concrete_wall_nor_gl_4k.png" id="3_nxtc6"]
+[ext_resource type="Texture2D" uid="uid://cm8qc60crg284" path="res://assets/floorTexture/patterned_concrete_wall_rough_4k.png" id="4_jlsqs"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_floor"]
 size = Vector2(10, 10)
@@ -25,6 +28,12 @@ size = Vector3(0.5, 0.5, 0.5)
 [sub_resource type="StandardMaterial3D" id="StdMat_fruit2"]
 albedo_color = Color(0.95, 0.75, 0.1, 1)
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0bbpv"]
+albedo_texture = ExtResource("2_c01mt")
+roughness_texture = ExtResource("4_jlsqs")
+normal_enabled = true
+normal_texture = ExtResource("3_nxtc6")
+
 [node name="Main" type="Node3D" unique_id=1829939798]
 script = ExtResource("1_ctrl")
 
@@ -40,6 +49,7 @@ shadow_enabled = true
 omni_range = 20.0
 
 [node name="Floor" type="MeshInstance3D" parent="." unique_id=1251651716]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.057646275, 0)
 mesh = SubResource("PlaneMesh_floor")
 surface_material_override/0 = SubResource("StdMat_floor")
 
@@ -60,6 +70,10 @@ surface_material_override/0 = SubResource("StdMat_fruit2")
 
 [node name="glowstone" parent="Fruits" unique_id=787822638 instance=ExtResource("3_0bbpv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0854969, 0.44985133, 1.3036608)
+
+[node name="Floor" type="MeshInstance3D" parent="Fruits" unique_id=447147549]
+mesh = SubResource("PlaneMesh_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_0bbpv")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1394546138]
 
