@@ -33,10 +33,11 @@ transform = Transform3D(1, 0, 0, 0, 0.939693, 0.34202, 0, -0.34202, 0.939693, 0,
 current = true
 fov = 60.0
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.812648, -0.349259, 0.46499, 0, 0.799999, 0.6, -0.582563, -0.487596, 0.650196, 0, 4, 0)
-light_energy = 1.1
+[node name="OmniLight3D" type="OmniLight3D" parent="." unique_id=522540505]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 3)
+light_energy = 8.0
 shadow_enabled = true
+omni_range = 20.0
 
 [node name="Floor" type="MeshInstance3D" parent="." unique_id=1251651716]
 mesh = SubResource("PlaneMesh_floor")

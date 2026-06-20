@@ -23,6 +23,8 @@ extends Node3D
 
 @export var move_speed: float = 4.0
 @export var look_sensitivity: float = 0.0035
+@export var light_move_speed: float = 3.0
+@export var light_height: float = 4.0   # fixed Y height for the light as it orbits/moves
 @export var use_viewport_resolution: bool = true  # if true, ignores render_width/height below and uses the actual window size
 @export var render_width: int = 320               # only used if use_viewport_resolution is false
 @export var render_height: int = 180               # only used if use_viewport_resolution is false
@@ -41,7 +43,7 @@ extends Node3D
 # slow CPU ray tracing.
 
 @onready var camera: Camera3D = $Camera3D
-@onready var sun: DirectionalLight3D = $DirectionalLight3D
+@onready var light_node: OmniLight3D = $OmniLight3D
 @onready var fruits_root: Node3D = $Fruits
 @onready var floor_mesh: MeshInstance3D = $Floor
 @onready var rt_overlay: TextureRect = $CanvasLayer/TextureRect
@@ -93,15 +95,16 @@ func _build_scene_data() -> void:
 	for child in _get_all_mesh_instances(fruits_root):
 		_raytracer.add_mesh_instance(child)
 
-	# Light: mirror the DirectionalLight3D's direction and color so the
-	# raster and ray-traced views are lit consistently.
-	var light_dir: Vector3 = -sun.global_transform.basis.z  # light points along -Z of its own basis
+	# Light: a positional point light, matching the OmniLight3D's actual
+	# world position, color and energy. is_directional=false tells the
+	# RayTracer to compute the light direction per-hit-point (point
+	# toward light.position), rather than using one fixed direction --
+	# this is what makes shadows rotate correctly as the light orbits.
 	var scene_light := RayTracer.SceneLight.new(
-		Vector3.ZERO,
-		sun.light_color,
-		sun.light_energy,
-		true,
-		light_dir
+		light_node.global_transform.origin,
+		light_node.light_color,
+		light_node.light_energy,
+		false
 	)
 	_raytracer.set_light(scene_light)
 
@@ -136,6 +139,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	_handle_light_movement(delta)
+
 	if _is_raytrace_mode or _is_rendering:
 		return
 
@@ -155,6 +160,32 @@ func _physics_process(delta: float) -> void:
 
 	if input_dir.length_squared() > 0.0:
 		camera.global_translate(input_dir.normalized() * move_speed * delta)
+
+
+## Moves the OmniLight3D in the world XZ plane using the arrow keys, at
+## a fixed height. Works independently of camera control (separate keys),
+## and intentionally still works while in ray-trace mode is being toggled
+## so the person can adjust the light, then press R to re-render.
+func _handle_light_movement(delta: float) -> void:
+	var move := Vector2.ZERO  # x, z plane movement
+	if Input.is_action_pressed("light_forward"):
+		move.y -= 1.0
+	if Input.is_action_pressed("light_back"):
+		move.y += 1.0
+	if Input.is_action_pressed("light_left"):
+		move.x -= 1.0
+	if Input.is_action_pressed("light_right"):
+		move.x += 1.0
+
+	if move.length_squared() == 0.0:
+		return
+
+	move = move.normalized() * light_move_speed * delta
+	var pos: Vector3 = light_node.global_transform.origin
+	pos.x += move.x
+	pos.z += move.y
+	pos.y = light_height
+	light_node.global_transform.origin = pos
 
 
 func _toggle_raytrace_mode() -> void:

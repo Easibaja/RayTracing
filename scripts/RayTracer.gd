@@ -437,6 +437,15 @@ func is_in_shadow(point: Vector3, normal: Vector3) -> bool:
 
 ## Lambertian (diffuse) shading: I = k_d * max(0, N . L)
 ## Plus a flat ambient term so unlit/shadowed surfaces aren't pure black.
+##
+## For positional (point) lights, applies inverse-square distance
+## attenuation -- physically, the same light energy spreads over a
+## sphere of surface area 4*pi*d^2 as it travels, so intensity falls
+## off as 1/d^2. This keeps the ray-traced view visually consistent
+## with Godot's OmniLight3D in the raster view, which attenuates
+## similarly. Directional lights have no meaningful distance (they
+## represent parallel rays from effectively infinite distance, e.g.
+## sunlight), so no attenuation is applied for those.
 func shade(hit: HitResult) -> Color:
 	if not hit.hit:
 		return Color(0.05, 0.06, 0.09)  # background / "sky" color
@@ -445,10 +454,20 @@ func shade(hit: HitResult) -> Color:
 		return hit.color * ambient
 
 	var light_dir: Vector3
+	var attenuation := 1.0
 	if light.is_directional:
 		light_dir = -light.direction
 	else:
-		light_dir = (light.position - hit.point).normalized()
+		var to_light: Vector3 = light.position - hit.point
+		var dist: float = to_light.length()
+		if dist < EPSILON:
+			light_dir = Vector3.UP  # degenerate case: point coincides with light
+		else:
+			light_dir = to_light / dist
+			# Inverse-square falloff, with a small +1 added to the
+			# denominator (a common "soft" variant) to avoid a
+			# singularity (division blow-up) as dist -> 0.
+			attenuation = 1.0 / (1.0 + dist * dist)
 
 	var n_dot_l: float = clamp(hit.normal.dot(light_dir), 0.0, 1.0)
 
@@ -456,7 +475,7 @@ func shade(hit: HitResult) -> Color:
 	if n_dot_l > 0.0 and is_in_shadow(hit.point, hit.normal):
 		shadow_factor = 0.0
 
-	var diffuse: float = n_dot_l * shadow_factor * light.energy
+	var diffuse: float = n_dot_l * shadow_factor * light.energy * attenuation
 	var intensity: float = ambient + diffuse * (1.0 - ambient)
 
 	return Color(
