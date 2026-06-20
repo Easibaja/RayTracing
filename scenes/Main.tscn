@@ -1,0 +1,81 @@
+[gd_scene format=3 uid="uid://bnml0ptasppvr"]
+
+[ext_resource type="Script" uid="uid://ck6u5d0le4njd" path="res://scripts/RayTraceController.gd" id="1_ctrl"]
+[ext_resource type="PackedScene" uid="uid://cjmma46ya5682" path="res://assets/fruits/lime.fbx" id="2_rvslj"]
+[ext_resource type="PackedScene" uid="uid://ic2aphk0w6y5" path="res://assets/glowstone.fbx" id="3_0bbpv"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_floor"]
+size = Vector2(10, 10)
+
+[sub_resource type="StandardMaterial3D" id="StdMat_floor"]
+albedo_color = Color(0.55, 0.52, 0.48, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_placeholder"]
+radius = 0.4
+height = 0.8
+radial_segments = 16
+rings = 8
+
+[sub_resource type="StandardMaterial3D" id="StdMat_fruit"]
+albedo_color = Color(0.85, 0.2, 0.15, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_placeholder2"]
+size = Vector3(0.5, 0.5, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="StdMat_fruit2"]
+albedo_color = Color(0.95, 0.75, 0.1, 1)
+
+[node name="Main" type="Node3D" unique_id=1829939798]
+script = ExtResource("1_ctrl")
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=2054165972]
+transform = Transform3D(1, 0, 0, 0, 0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 2.2, 4)
+current = true
+fov = 60.0
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.812648, -0.349259, 0.46499, 0, 0.799999, 0.6, -0.582563, -0.487596, 0.650196, 0, 4, 0)
+light_energy = 1.1
+shadow_enabled = true
+
+[node name="Floor" type="MeshInstance3D" parent="." unique_id=1251651716]
+mesh = SubResource("PlaneMesh_floor")
+surface_material_override/0 = SubResource("StdMat_floor")
+
+[node name="Fruits" type="Node3D" parent="." unique_id=1202339293]
+
+[node name="lime" parent="Fruits" unique_id=1778421981 instance=ExtResource("2_rvslj")]
+transform = Transform3D(5.4574385, 0, 13.971985, 0, 15, 0, -13.971985, 0, 5.4574385, 0.59527475, 0.06225115, 1.0096302)
+
+[node name="Fruit_Apple_Placeholder" type="MeshInstance3D" parent="Fruits" unique_id=1457318891]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, 0.4, 0)
+mesh = SubResource("SphereMesh_placeholder")
+surface_material_override/0 = SubResource("StdMat_fruit")
+
+[node name="Fruit_Box_Placeholder" type="MeshInstance3D" parent="Fruits" unique_id=576948191]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 0.25, -0.3)
+mesh = SubResource("BoxMesh_placeholder2")
+surface_material_override/0 = SubResource("StdMat_fruit2")
+
+[node name="glowstone" parent="Fruits" unique_id=787822638 instance=ExtResource("3_0bbpv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0854969, 0.44985133, 1.3036608)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1394546138]
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer" unique_id=586096454]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="CanvasLayer" unique_id=325099]
+offset_left = 12.0
+offset_top = 12.0
+offset_right = 600.0
+offset_bottom = 40.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_outline_size = 2
+text = "RASTER (live) -- press R to ray trace"
